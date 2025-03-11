@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import { use } from "react";
 const initialItems = [
   { id: 1, description: "Passports", quantity: 2, packed: true },
   { id: 2, description: "Socks", quantity: 12, packed: false },
@@ -13,6 +12,8 @@ const initialItems = [
 
 function App() {
   const [Item, setitem] = useState([]);
+  const totalItems = Item.length;
+  const totaPackedItems = Item.filter((item) => item.packed).length;
   function handleItems(item) {
     setitem((Item) => [...Item, item]);
   }
@@ -29,14 +30,16 @@ function App() {
   return (
     <>
       {" "}
-      <Logo />
-      <Form onAddItems={handleItems} />
-      <PackingList
-        item={Item}
-        onDelete={handleDeletedItem}
-        onCheck={handleCheck}
-      />
-      <Stats />
+      <div className="main-box">
+        <Logo />
+        <Form onAddItems={handleItems} />
+        <PackingList
+          item={Item}
+          onDelete={handleDeletedItem}
+          onCheck={handleCheck}
+        />
+        <Stats len={totalItems} packedItems={totaPackedItems} />
+      </div>
     </>
   );
 }
@@ -94,10 +97,27 @@ function Form({ onAddItems }) {
   );
 }
 function PackingList({ item, onDelete, onCheck }) {
+  const [sort, setSort] = useState("input");
+  let sortedItems = item;
+  function clearList() {
+    const confirmed = window.confirm(
+      "Are you sure you want to clear the whole list ?"
+    );
+    if (confirmed) item.map((i) => onDelete(i.id));
+  }
+  if (sort === "input") sortedItems = item;
+  if (sort === "description")
+    sortedItems = item
+      .slice()
+      .sort((a, b) => a.description.localeCompare(b.description));
+  if (sort === "packed")
+    sortedItems = item
+      .slice()
+      .sort((a, b) => Number(a.packed) - Number(b.packed));
   return (
     <>
       <div className="list">
-        {item.map((item) => (
+        {sortedItems.map((item) => (
           <Item
             key={item.id}
             item={item}
@@ -105,6 +125,14 @@ function PackingList({ item, onDelete, onCheck }) {
             oncheck={onCheck}
           />
         ))}
+        <div className="sorting">
+          <select value={sort} onChange={(e) => setSort(e.target.value)}>
+            <option value="input">Sort by input</option>
+            <option value="description">Sort by description</option>
+            <option value="packed"> Sort by packed items</option>
+          </select>
+          <button onClick={clearList}>Clear List</button>
+        </div>
       </div>
     </>
   );
@@ -135,10 +163,19 @@ function Item({ item, ondelete, oncheck }) {
     </>
   );
 }
-function Stats() {
+function Stats({ len, packedItems }) {
+  const percentage = Number(Math.round((packedItems / len) * 100));
+
   return (
     <footer>
-      <em>You have X items on your list,and you already packed(X%)</em>
+      {}
+      <em>
+        {!isNaN(percentage) && percentage !== null
+          ? `You have ${len} items on your list, and you already packed ${packedItems} 
+     items, which is ${percentage} %`
+          : `You have ${len} items on your list, and you already packed ${packedItems} 
+     items, so percentage is invalid.`}
+      </em>
     </footer>
   );
 }

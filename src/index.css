@@ -25,7 +25,6 @@ img {
   gap: 20px;
   justify-content: center;
   align-items: center;
-  height: 5rem;
   margin: 0;
 }
 .bar::placeholder {
@@ -46,13 +45,7 @@ img {
   border: none;
   cursor: pointer;
 }
-.list {
-  background-color: rgb(128, 73, 25, 0.6);
-  height: 400px;
-  color: #f6e8db;
-  font-size: 18px;
-  padding: 50px 100px 50px 100px;
-}
+
 select {
   width: 50px;
   height: 30px;
@@ -63,10 +56,17 @@ select {
   cursor: pointer;
 }
 .list {
+  background-color: rgb(128, 73, 25, 0.6);
+  height: 400px;
+  color: #f6e8db;
+  font-size: 18px;
+  padding: 50px 100px 50px 100px;
   display: flex;
+  justify-content: center;
   gap: 120px;
   flex-wrap: wrap;
   overflow: scroll;
+  position: relative;
 }
 .list ul li {
   margin: 0;
@@ -126,4 +126,24 @@ footer {
   height: 57px;
   background-color: #33b6a3;
   text-align: center;
+}
+.sorting {
+  display: flex;
+  gap: 20px;
+  position: fixed;
+  bottom: 100px;
+}
+.sorting select {
+  width: 300px;
+  background-color: #f6decc;
+  font-size: 16px;
+}
+.sorting button {
+  background-color: #f6decc;
+  border: none;
+  padding: 5px 10px 5px 10px;
+  font-size: 16px;
+  border-radius: 10px;
+  width: 100px;
+  cursor: pointer;
 }
