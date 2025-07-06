@@ -1,5 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
+
 import "./index.css";
 const initialItems = [
   { id: 1, description: "Passports", quantity: 2, packed: true },
@@ -11,38 +15,48 @@ const initialItems = [
 ];
 
 function App() {
-  const [Item, setitem] = useState([]);
-  const totalItems = Item.length;
-  const totaPackedItems = Item.filter((item) => item.packed).length;
+  const [items, setItems] = useState(() => {
+    const stored = localStorage.getItem("tripItems");
+    return stored ? JSON.parse(stored) : [];
+  });
+
+  const totalItems = items.length;
+  const totalPackedItems = items.filter((item) => item.packed).length;
+
   function handleItems(item) {
-    setitem((Item) => [...Item, item]);
+    setItems((prevItems) => [...prevItems, item]);
   }
+
   function handleDeletedItem(id) {
-    setitem((Item) => Item.filter((item) => item.id !== id));
+    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
   }
+
   function handleCheck(id) {
-    setitem((Item) =>
-      Item.map((item) =>
+    setItems((prevItems) =>
+      prevItems.map((item) =>
         item.id === id ? { ...item, packed: !item.packed } : item
       )
     );
   }
+
+  useEffect(() => {
+    localStorage.setItem("tripItems", JSON.stringify(items));
+  }, [items]);
+
   return (
-    <>
-      {" "}
-      <div className="main-box">
-        <Logo />
-        <Form onAddItems={handleItems} />
-        <PackingList
-          item={Item}
-          onDelete={handleDeletedItem}
-          onCheck={handleCheck}
-        />
-        <Stats len={totalItems} packedItems={totaPackedItems} />
-      </div>
-    </>
+    <div className="main-box">
+      <Logo />
+      <Form onAddItems={handleItems} />
+      <PackingList
+        item={items}
+        onDelete={handleDeletedItem}
+        onCheck={handleCheck}
+      />
+      <Stats len={totalItems} packedItems={totalPackedItems} />
+    </div>
   );
 }
+
 function Logo() {
   return (
     <>
@@ -54,6 +68,7 @@ function Logo() {
     </>
   );
 }
+
 function Form({ onAddItems }) {
   const [description, setDescription] = useState("");
   const [option, setOption] = useState(1);
@@ -71,26 +86,28 @@ function Form({ onAddItems }) {
     <>
       <form className="form" onSubmit={handleSubmit}>
         <h3>What do you need for your trip ?</h3>
-        <select
-          value={option}
-          onChange={(e) => {
-            setOption(Number(e.target.value));
-          }}
-        >
-          {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
-            <option value={num} key={num}>
-              {num}
-            </option>
-          ))}
-        </select>
-        <input
-          className="bar"
-          value={description}
-          placeholder="Add items..."
-          onChange={(e) => {
-            setDescription(e.target.value);
-          }}
-        />
+        <div className="input-select">
+          <select
+            value={option}
+            onChange={(e) => {
+              setOption(Number(e.target.value));
+            }}
+          >
+            {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
+              <option value={num} key={num}>
+                {num}
+              </option>
+            ))}
+          </select>
+          <input
+            className="bar"
+            value={description}
+            placeholder="Add items..."
+            onChange={(e) => {
+              setDescription(e.target.value);
+            }}
+          />
+        </div>
         <button className="btn">ADD</button>
       </form>
     </>
@@ -117,14 +134,16 @@ function PackingList({ item, onDelete, onCheck }) {
   return (
     <>
       <div className="list">
-        {sortedItems.map((item) => (
-          <Item
-            key={item.id}
-            item={item}
-            ondelete={onDelete}
-            oncheck={onCheck}
-          />
-        ))}
+        <ul className="list-items">
+          {sortedItems.map((item) => (
+            <Item
+              key={item.id}
+              item={item}
+              ondelete={onDelete}
+              oncheck={onCheck}
+            />
+          ))}
+        </ul>
         <div className="sorting">
           <select value={sort} onChange={(e) => setSort(e.target.value)}>
             <option value="input">Sort by input</option>
@@ -140,8 +159,8 @@ function PackingList({ item, onDelete, onCheck }) {
 function Item({ item, ondelete, oncheck }) {
   return (
     <>
-      <ul className="list-items">
-        <li>
+      <li className="list-item">
+        <div className="list-part-one">
           <input
             className="checkbox"
             value={item.packed}
@@ -149,17 +168,18 @@ function Item({ item, ondelete, oncheck }) {
             onChange={(e) => oncheck(item.id)}
           />
           <div
-            className="list-item"
+            className="list-content"
             style={item.packed ? { textDecoration: "line-through" } : {}}
           >
-            <span>{item.option} </span>
-            {item.description}
-            <p className="cut" onClick={() => ondelete(item.id)}>
-              ❌
-            </p>
+            <span>
+              {item.option} &nbsp; {item.description}
+            </span>
           </div>
-        </li>
-      </ul>
+        </div>
+        <span className="list-part-two" onClick={() => ondelete(item.id)}>
+          <FontAwesomeIcon icon={faTimes} className="cross-icon" />
+        </span>
+      </li>
     </>
   );
 }
